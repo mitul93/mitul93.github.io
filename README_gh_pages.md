@@ -47,12 +47,24 @@ This project is designed to build and test locally using devcontainer.
 
 ## Building and Serving website locally
 
+Run the following command to install dependencies and start the local Jekyll server:
 ```shell
 make serve
 ```
+Once the server is running, open your browser and navigate to
 
-To clean artifacts
+```text
+http://127.0.0.1:4000/
+```
+
+## Troubleshooting
+To clean Jekyll artifacts
 
 ```shell
 make clean
+```
+
+To install bundle dependencies
+```shell
+make bundle_install_deps
 ```

@@ -13,7 +13,12 @@ clean: ## Clean generated files and artifacts
 	@echo "==> Cleaning up Jekyll artifacts..."
 	@cd $(JEKYLL_DIR) && rm -rf _site .jekyll-cache .sass-cache .jekyll-metadata
 
+# ── Bundle install─────────────────────────────────────────────────────────────
+.PHONY: bundle_install_deps
+bundle_install_deps: ## Install bundle dependencies
+	@cd $(JEKYLL_DIR) && bundle install
+
 # ── Serve ─────────────────────────────────────────────────────────────────────
 .PHONY: serve
-serve: ## Serve the site locally
+serve: bundle_install_deps ## Serve the site locally
 	@cd $(JEKYLL_DIR) && bundle exec jekyll serve
