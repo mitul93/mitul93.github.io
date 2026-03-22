@@ -35,7 +35,7 @@ ENV PATH=/home/${USERNAME}/gems/bin:$PATH
 RUN gem install jekyll bundler
 
 # working directory
-ARG REPOSITORY_NAME=mitul93
+ARG REPOSITORY_NAME=mitul93.github.io
 WORKDIR /${REPOSITORY_NAME}
 
 # entry point

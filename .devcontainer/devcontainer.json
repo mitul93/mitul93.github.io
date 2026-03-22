@@ -1,5 +1,5 @@
 {
-	"name": "mitul93_devcontainer",
+	"name": "mitul93.github.io_github_io_devcontainer",
 	"build": {
 		"context": "..",
 		"dockerfile": "Containerfile"
@@ -20,8 +20,8 @@
 	"containerEnv": {
 		"DISPLAY": "${localEnv:DISPLAY}"
 	},
-	"workspaceMount": "source=${localWorkspaceFolder},target=/mitul93,type=bind,consistency=cached",
-	"workspaceFolder": "/mitul93",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/mitul93.github.io,type=bind,consistency=cached",
+	"workspaceFolder": "/mitul93.github.io",
 	"portsAttributes": {
 		"4000": {
 			"label": "Jekyll",
