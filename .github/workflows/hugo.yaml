@@ -83,8 +83,8 @@ jobs:
           docker run --rm \
             --user "${{ steps.user.outputs.uid }}:${{ steps.user.outputs.gid }}" \
             --entrypoint /bin/bash \
-            -v "${{ github.workspace }}/my-website:/workspace" \
-            -w /workspace \
+            -v "${{ github.workspace }}/my-website:/my-website" \
+            -w /my-website \
             my-website:latest \
             -c 'make build_website'
 
