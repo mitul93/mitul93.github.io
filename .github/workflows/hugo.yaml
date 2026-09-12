@@ -1,0 +1,111 @@
+name: Deploy Hugo site
+
+on:
+ workflow_dispatch:
+  inputs:
+   tag:
+    description: "Tag in mitul93/my-website to deploy"
+    required: true
+    type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # Checkout the private repository at the requested tag.
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          repository: mitul93/my-website
+          ref: ${{ inputs.tag }}
+          token: ${{ secrets.MY_WEBSITE_READONLY_TOKEN }}
+          path: my-website
+
+      - name: Get user IDs
+        id: user
+        run: |
+          echo "uid=$(id -u)" >> "$GITHUB_OUTPUT"
+          echo "gid=$(id -g)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Docker build cache
+        uses: actions/cache@v6
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('my-website/.devcontainer/Containerfile') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ hashFiles('my-website/.devcontainer/Containerfile') }}-
+            ${{ runner.os }}-buildx-
+
+      - name: Build Hugo Container
+        uses: docker/build-push-action@v6
+        with:
+          context: ./my-website
+          file: ./my-website/.devcontainer/Containerfile
+          tags: my-website:latest
+          load: true
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          build-args: |
+            USERNAME=devcontainer
+            USER_UID=${{ steps.user.outputs.uid }}
+            USER_GID=${{ steps.user.outputs.gid }}
+
+      - name: Update Docker cache
+        if: always()
+        run: |
+          if [ -d /tmp/.buildx-cache-new ]; then
+            rm -rf /tmp/.buildx-cache
+            mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          fi
+
+      - name: Save Docker build cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('my-website/.devcontainer/Containerfile') }}-${{ github.run_id }}
+
+      - name: Build Hugo Site
+        run: |
+          docker run --rm \
+            --user "${{ steps.user.outputs.uid }}:${{ steps.user.outputs.gid }}" \
+            --entrypoint /bin/bash \
+            -v "${{ github.workspace }}/my-website:/workspace" \
+            -w /workspace \
+            my-website:latest \
+            -c 'make build_website'
+
+      # Configure GitHub Pages.
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+      # Package the generated static site as a Pages artifact.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ github.workspace }}/my-website/build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
