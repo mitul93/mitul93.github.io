@@ -44,7 +44,7 @@ jobs:
             tag="$INPUT_TAG"
             echo "Using manually specified tag: $tag"
           else
-            if ! tag=$(python scripts/read_deployment_config.py); then
+            if ! tag=$(python scripts/read_deployment_config_tag.py); then
               echo "::error::Failed to read deployment tag from deployment.yaml"
               exit 1
             fi
