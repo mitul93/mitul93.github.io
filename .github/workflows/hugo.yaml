@@ -1,19 +1,19 @@
 name: Deploy Hugo site
 
-# on:
-#  workflow_dispatch:
-#   inputs:
-#    tag:
-#     description: "Tag in mitul93/my-website to deploy"
-#     required: true
-#     type: string
-
 on:
   push:
     branches:
       - main
     paths:
       - deployment.yaml
+
+on:
+ workflow_dispatch:
+  inputs:
+   tag:
+    description: "Tag in mitul93/my-website to deploy (overrides deployment.yaml)"
+    required: true
+    type: string
 
 permissions:
   contents: read
@@ -37,10 +37,19 @@ jobs:
 
       - name: Read deployment tag
         id: config
+        shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
-          if ! tag=$(python scripts/read_deployment_config.py); then
-            echo "::error::Failed to read deployment configuration"
-            exit 1
+          if [[ -n "$INPUT_TAG" ]]; then
+            tag="$INPUT_TAG"
+            echo "Using manually specified tag: $tag"
+          else
+            if ! tag=$(python scripts/read_deployment_config.py); then
+              echo "::error::Failed to read deployment tag from deployment.yaml"
+              exit 1
+            fi
+            echo "Using tag from deployment.yaml: $tag"
           fi
 
           if [[ -z "$tag" ]]; then
