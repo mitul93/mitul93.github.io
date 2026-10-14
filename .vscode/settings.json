@@ -1,7 +1,8 @@
 {
-    "containers.containerClient": "com.microsoft.visualstudio.containers.podman",
-    "editor": {
-        "formatOnSave": true
-    },
-    "remote.autoForwardPorts": false
+    "editor.formatOnSave": true,
+    "telemetry.feedback.enabled": false,
+    "telemetry.editStats.details.enabled": false,
+    "telemetry.editStats.showDecorations": false,
+    "telemetry.editStats.enabled": false,
+    "editor.experimental.treeSitterTelemetry": false
 }
